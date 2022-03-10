@@ -50,7 +50,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "phpstan/extension-installer": true
         },
         "optimize-autoloader": true,
         "preferred-install": {
@@ -86,7 +87,33 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "cs-fixer": "XDEBUG_MODE=off vendor/bin/php-cs-fixer fix src --allow-risky=yes",
+        "phpstan": "XDEBUG_MODE=off vendor/bin/phpstan analyse src -n",
+        "dependency:security:check": "local-php-security-checker",
+        "database:schema:validate": "XDEBUG_MODE=off bin/console doctrine:schema:validate --skip-sync",
+        "code:style:lint": "@cs-fixer --diff --dry-run -vvv",
+        "code:style:copy-paste": "XDEBUG_MODE=off phpcpd src --exclude=src/Entity",
+        "code:style:static-analysis": "@phpstan --level=9 --memory-limit=-1 --no-progress",
+        "code:style": [
+            "@code:style:lint",
+            "@code:style:copy-paste",
+            "@code:style:static-analysis"
+        ],
+        "code:resource:lint": [
+            "XDEBUG_MODE=off bin/console lint:yaml config --parse-tags",
+            "XDEBUG_MODE=off bin/console lint:yaml src --parse-tags"
+        ],
+        "code": [
+            "@code:resource:lint",
+            "@code:style"
+        ],
+        "analyse": [
+            "@dependency:security:check",
+            "@database:schema:validate",
+            "@code"
+        ],
+
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -98,6 +125,13 @@
         }
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.7",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^1.4",
+        "phpstan/phpstan-doctrine": "^1.2",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpstan/phpstan-strict-rules": "^1.1",
+        "phpstan/phpstan-symfony": "^1.1",
         "symfony/debug-bundle": "6.0.*",
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "6.0.*",
