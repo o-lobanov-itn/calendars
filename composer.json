@@ -50,7 +50,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "phpstan/extension-installer": true
         },
         "optimize-autoloader": true,
         "preferred-install": {
@@ -86,6 +87,52 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "xdebug-off": "XDEBUG_MODE=off",
+        "env-test": "XDEBUG_MODE=off APP_ENV=test",
+        "console": "@xdebug-off bin/console",
+        "console-test": "@env-test bin/console",
+        "cs-fixer": "@xdebug-off vendor/bin/php-cs-fixer fix src --allow-risky=yes",
+        "phpstan": "@xdebug-off vendor/bin/phpstan analyse src -n",
+        "dependency:security:check": "local-php-security-checker",
+        "database:schema:validate": "@xdebug-off bin/console doctrine:schema:validate --skip-sync",
+        "code:style:lint": "@cs-fixer --diff --dry-run -vvv",
+        "code:style:copy-paste": "@xdebug-off phpcpd src --exclude=src/Entity",
+        "code:style:static-analysis": "@phpstan --level=9 --memory-limit=-1 --no-progress",
+        "code:style": [
+            "@code:style:lint",
+            "@code:style:copy-paste",
+            "@code:style:static-analysis"
+        ],
+        "code:resource:lint": [
+            "@console lint:yaml config --parse-tags",
+            "@console lint:yaml src --parse-tags"
+        ],
+        "code": [
+            "@code:resource:lint",
+            "@code:style"
+        ],
+        "analyse": [
+            "@dependency:security:check",
+            "@database:schema:validate",
+            "@code"
+        ],
+        "test:database:prepare": [
+            "@console-test doctrine:database:drop --force --if-exists",
+            "@console-test doctrine:database:create",
+            "@console-test doctrine:schema:create",
+            "@console-test doctrine:fixtures:load --quiet"
+        ],
+        "test:cleanup": [
+            "@console-test doctrine:database:drop --force --if-exists"
+        ],
+        "test:run": "@xdebug-off php -d 'memory_limit=768M' bin/phpunit",
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "rm -rf var/cache/test",
+            "@test:database:prepare",
+            "@test:run",
+            "@test:cleanup"
         ]
     },
     "conflict": {
@@ -98,8 +145,20 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "friendsofphp/php-cs-fixer": "^3.7",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^1.4",
+        "phpstan/phpstan-doctrine": "^1.2",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpstan/phpstan-strict-rules": "^1.1",
+        "phpstan/phpstan-symfony": "^1.1",
+        "phpunit/phpunit": "^9.5",
+        "symfony/browser-kit": "6.0.*",
+        "symfony/css-selector": "6.0.*",
         "symfony/debug-bundle": "6.0.*",
         "symfony/maker-bundle": "^1.0",
+        "symfony/phpunit-bridge": "^6.0",
         "symfony/stopwatch": "6.0.*",
         "symfony/web-profiler-bundle": "6.0.*"
     }
