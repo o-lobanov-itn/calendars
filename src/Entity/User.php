@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -16,23 +20,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private int $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private $email;
+    private string $email;
 
+    /**
+     * @var array<string>
+     */
     #[ORM\Column(type: 'json')]
-    private $roles = [];
+    private array $roles;
 
     #[ORM\Column(type: 'string')]
-    private $password;
+    private string $password;
 
-    public function getId(): ?int
+    /**
+     * @var Collection<int, CalendarAccount>
+     */
+    #[ORM\OneToMany(mappedBy: 'calendarUser', targetEntity: CalendarAccount::class, orphanRemoval: true)]
+    private Collection $calendarAccounts;
+
+    public function __construct()
+    {
+        $this->roles = [];
+        $this->calendarAccounts = new ArrayCollection();
+    }
+
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -51,7 +70,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return $this->email;
     }
 
     /**
@@ -66,6 +85,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param array<string> $roles
+     * @return $this
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -91,9 +114,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, CalendarAccount>
+     */
+    public function getCalendarAccounts(): Collection
+    {
+        return $this->calendarAccounts;
+    }
+
+    public function addCalendarAccount(CalendarAccount $calendarAccount): self
+    {
+        if (!$this->calendarAccounts->contains($calendarAccount)) {
+            $this->calendarAccounts[] = $calendarAccount;
+            $calendarAccount->setCalendarUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCalendarAccount(CalendarAccount $calendarAccount): self
+    {
+        $this->calendarAccounts->removeElement($calendarAccount);
+
+        return $this;
     }
 }
