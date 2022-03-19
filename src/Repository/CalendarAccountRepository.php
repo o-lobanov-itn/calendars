@@ -15,6 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method CalendarAccount|null findOneBy(array $criteria, array $orderBy = null)
  * @method CalendarAccount[]    findAll()
  * @method CalendarAccount[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<CalendarAccount>
  */
 class CalendarAccountRepository extends ServiceEntityRepository
 {
