@@ -8,6 +8,7 @@ use App\Repository\CalendarAccountRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: CalendarAccountRepository::class)]
 class CalendarAccount
@@ -22,7 +23,7 @@ class CalendarAccount
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'calendarAccounts')]
     #[ORM\JoinColumn(nullable: false)]
-    private User $calendarUser;
+    private UserInterface $calendarUser;
 
     #[ORM\Column(type: 'string', length: 10)]
     private string $source;
@@ -49,12 +50,12 @@ class CalendarAccount
         return $this->id;
     }
 
-    public function getCalendarUser(): User
+    public function getCalendarUser(): UserInterface
     {
         return $this->calendarUser;
     }
 
-    public function setCalendarUser(User $calendarUser): self
+    public function setCalendarUser(UserInterface $calendarUser): self
     {
         $this->calendarUser = $calendarUser;
 

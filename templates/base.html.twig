@@ -23,6 +23,7 @@
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
                 {% if app.user %}
                     <span class="mdc-top-app-bar__title">{{ app.user.email }}</span>
+                    <a class="material-icons mdc-top-app-bar__action-item mdc-icon-button" href="{{ path('app_calendars') }}" aria-label="Calendars">list</a>
                     <a class="material-icons mdc-top-app-bar__action-item mdc-icon-button" href="{{ path('app_logout') }}" aria-label="Logout">logout</a>
                 {% else %}
                     <a class="material-icons mdc-top-app-bar__action-item mdc-icon-button" href="{{ path('app_login') }}" aria-label="Login">login</a>

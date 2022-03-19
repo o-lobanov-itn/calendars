@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Calendars{% endblock %}
+
+{% block main %}
+    <ul class="mdc-list">
+        {% for account in accounts %}
+            <li class="mdc-list-item">
+                <span class="mdc-list-item__ripple"></span>
+                <span class="mdc-list-item__text">{{ account.source }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {{ form(form) }}
+{% endblock %}

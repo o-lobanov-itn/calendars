@@ -9,6 +9,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method CalendarAccount|null find($id, $lockMode = null, $lockVersion = null)
@@ -46,6 +47,24 @@ class CalendarAccountRepository extends ServiceEntityRepository
         if ($flush) {
             $this->_em->flush();
         }
+    }
+
+    /**
+     * @param UserInterface $user
+     *
+     * @return array<CalendarAccount>
+     */
+    public function findByUser(UserInterface $user): array
+    {
+        $result = $this->createQueryBuilder('c')
+            ->andWhere('c.calendarUser = :val')
+            ->setParameter('val', $user)
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+
+        return is_array($result) ? $result : [];
     }
 
     // /**
